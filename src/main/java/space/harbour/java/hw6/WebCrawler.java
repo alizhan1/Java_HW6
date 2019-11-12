@@ -12,11 +12,10 @@ import java.util.regex.Pattern;
 
 public class WebCrawler {
 
-    private List<String> neverVisit = new ArrayList<>();
-    private ConcurrentLinkedQueue<URL> toVisit = new ConcurrentLinkedQueue<>();
-    private CopyOnWriteArraySet<URL> alreadyVisited = new CopyOnWriteArraySet<>();
+    private static ConcurrentLinkedQueue<URL> toVisit = new ConcurrentLinkedQueue<>();
+    private static CopyOnWriteArraySet<URL> alreadyVisited = new CopyOnWriteArraySet<>();
 
-    public void extractUrls(String text) throws MalformedURLException {
+    public static void extractUrls(String text) throws MalformedURLException {
         String urlRegex = "((https?|ftp|gopher|telnet|file):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
         Pattern pattern = Pattern.compile(urlRegex, Pattern.CASE_INSENSITIVE);
         Matcher urlMatcher = pattern.matcher(text);
@@ -31,7 +30,7 @@ public class WebCrawler {
     }
 
 
-    public void getContentOfWebPage(URL url) throws MalformedURLException {
+    public static void getContentOfWebPage(URL url) throws MalformedURLException {
         final StringBuilder content = new StringBuilder();
 
         try ( InputStream is = url.openConnection().getInputStream();
@@ -54,12 +53,16 @@ public class WebCrawler {
         ExecutorService pool = Executors.newFixedThreadPool(10);
         Runnable task = new Runnable() {
             @Override
-            public void run() throws Exception {
-                getContentOfWebPage(u);
+            public void run() {
+                try {
+                    getContentOfWebPage(u);
+                }
+                catch (MalformedURLException e) {
+                    System.out.println("Shit, man you cought an exception!!");
+                }
             }
         };
 
         Future future1 = pool.submit(task);
-
     }
 }
