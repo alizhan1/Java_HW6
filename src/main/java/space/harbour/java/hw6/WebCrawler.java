@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 public class WebCrawler {
 
-    private List<URL> neverVisit = new ArrayList<>();
+    private List<String> neverVisit = new ArrayList<>();
     private ConcurrentLinkedQueue<URL> toVisit = new ConcurrentLinkedQueue<>();
     private CopyOnWriteArraySet<URL> alreadyVisited = new CopyOnWriteArraySet<>();
 
@@ -24,14 +24,14 @@ public class WebCrawler {
         while (urlMatcher.find())
         {
             URL url = new URL(text.substring(urlMatcher.start(0), urlMatcher.end(0)));
-            if (!alreadyVisited.contains(url)) {
+            if (!alreadyVisited.contains(url) && url.toString().indexOf("facebook") != -1 && url.toString().indexOf("linkedin") != -1 && url.toString().indexOf("twitter") != -1 && url.toString().indexOf("google") != -1) {
                 toVisit.add(url);
             }
         }
     }
 
 
-    public static String getContentOfWebPage(URL url) {
+    public void getContentOfWebPage(URL url) throws MalformedURLException {
         final StringBuilder content = new StringBuilder();
 
         try ( InputStream is = url.openConnection().getInputStream();
@@ -45,34 +45,21 @@ public class WebCrawler {
             System.out.println("Failed to retrieve content of " + url.toString());
             e.printStackTrace();
         }
-
-        return content.toString();
+        alreadyVisited.add(url);
+        extractUrls(content.toString());
     }
 
     public static void main(String[] args) throws MalformedURLException {
         URL u = new URL("https://stackoverflow.com/questions/5713558/detect-and-extract-url-from-a-string");
-        String c = getContentOfWebPage(u);
-        System.out.println(c);
-//        ExecutorService pool = Executors.newFixedThreadPool(10);
-//        Callable<Integer> task = new Callable<Integer>() {
-//            @Override
-//            public Integer call() throws Exception {
-//
-//            }
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        Runnable task = new Runnable() {
+            @Override
+            public void run() throws Exception {
+                getContentOfWebPage(u);
+            }
+        };
 
-//        };
-//
-//
-//        Future<Integer> future1 = pool.submit(task);
-//        Future<Integer> future2 = pool.submit(task);
-//
-//        try {
-//            System.out.println(future1.get());
-//            System.out.println(future2.get());
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        }
+        Future future1 = pool.submit(task);
+
     }
 }
