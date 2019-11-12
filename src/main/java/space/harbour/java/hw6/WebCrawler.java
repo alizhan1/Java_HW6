@@ -49,12 +49,15 @@ public class WebCrawler {
     }
 
     public static void main(String[] args) throws MalformedURLException {
-        URL u = new URL("https://stackoverflow.com/questions/5713558/detect-and-extract-url-from-a-string");
-        ExecutorService pool = Executors.newFixedThreadPool(10);
+        URL u = new URL("http://www.zmiaikou.com/");
+        toVisit.add(u);
+        ExecutorService pool = Executors.newFixedThreadPool(5);
         Runnable task = new Runnable() {
             @Override
             public void run() {
                 try {
+                    URL u = toVisit.poll();
+                    System.out.println(u);
                     getContentOfWebPage(u);
                 }
                 catch (MalformedURLException e) {
