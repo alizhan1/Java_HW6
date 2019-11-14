@@ -44,7 +44,6 @@ public class WebCrawler {
             System.out.println("Failed to retrieve content of " + url.toString());
             e.printStackTrace();
         }
-        System.out.println("I am called");
         alreadyVisited.add(url);
         extractUrls(content.toString());
     }
@@ -52,15 +51,12 @@ public class WebCrawler {
     public static void main(String[] args) throws MalformedURLException {
         URL u = new URL("http://www.zmiaikou.com/");
         toVisit.add(u);
-        getContentOfWebPage(toVisit.poll());
         ExecutorService pool = Executors.newFixedThreadPool(5);
         Runnable task = new Runnable() {
             @Override
             public void run() {
                 try {
-                    URL u = toVisit.poll();
-                    System.out.println(toVisit.size());
-                    getContentOfWebPage(u);
+                    getContentOfWebPage(toVisit.poll());
                 }
                 catch (MalformedURLException e) {
                     System.out.println("Shit, man you cought an exception!!");
